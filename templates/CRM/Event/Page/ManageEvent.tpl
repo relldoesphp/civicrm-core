@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -50,7 +50,7 @@
 
 <div class="action-link">
   <a accesskey="N" href="{$newEventURL}" id="newManageEvent" class="button crm-popup">
-    <span><div class="icon add-icon"></div>{ts}Add Event{/ts}</span>
+    <span><div class="icon ui-icon-circle-plus"></div>{ts}Add Event{/ts}</span>
   </a>
   <div class="clear"></div>
 </div>
@@ -61,7 +61,6 @@
   {include file="CRM/common/pagerAToZ.tpl"}
   {* handle enable/disable actions*}
   {include file="CRM/common/enableDisableApi.tpl"}
-  {include file="CRM/common/crmeditable.tpl"}
   {include file="CRM/common/jsortable.tpl"}
     <table id="options" class="display">
       <thead>
@@ -109,8 +108,13 @@
                   {foreach from=$rows.tab key=k item=v}
                     {assign var="fld" value=$v.field}
                     {if NOT $row.$fld}{assign var="status" value="disabled"}{else}{assign var="status" value="enabled"}{/if}
-                    <li><a title="{$v.title}" class="action-item crm-hover-button {$status}"
+                      {if $k eq 'reminder'}
+                        <li><a title="{$v.title}" class="action-item crm-hover-button {$status}"
+                           href="{crmURL p="`$v.url`" q="reset=1&action=browse&setTab=1&id=`$row.id`"}">{$v.title}</a>
+                      {else}
+                        <li><a title="{$v.title}" class="action-item crm-hover-button {$status}"
                            href="{crmURL p="`$v.url`" q="reset=1&action=update&id=`$row.id`"}">{$v.title}</a></li>
+                      {/if}
                   {/foreach}
                 </ul>
               </span>

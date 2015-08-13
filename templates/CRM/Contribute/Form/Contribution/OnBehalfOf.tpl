@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -109,7 +109,9 @@
             {$form.onbehalf.$fieldName.html}
             {if !empty($onBehalfOfFields.$fieldName.html_type)  && $onBehalfOfFields.$fieldName.html_type eq 'Autocomplete-Select'}
               {assign var=elementName value=onbehalf[$fieldName]}
-            {include file="CRM/Custom/Form/AutoComplete.tpl" element_name=$elementName}
+              {if $onBehalfOfFields.$fieldName.data_type eq 'ContactReference'}
+                {include file="CRM/Custom/Form/ContactReference.tpl" element_name = $elementName}
+              {/if}
             {/if}
             {if $onBehalfOfFields.$fieldName.name|substr:0:5 eq 'phone'}
               {assign var="phone_ext_field" value=$onBehalfOfFields.$fieldName.name|replace:'phone':'phone_ext'}
@@ -117,9 +119,9 @@
                 &nbsp;{$form.onbehalf.$phone_ext_field.html}
               {/if}
             {/if}
-      {if $onBehalfOfFields.$fieldName.data_type eq 'Date'}
-            {assign var=elementName value=onbehalf[$fieldName]}
-         {include file="CRM/common/jcalendar.tpl" elementName=$elementName elementId=onbehalf_$fieldName}
+            {if $onBehalfOfFields.$fieldName.data_type eq 'Date'}
+              {assign var=elementName value=onbehalf[$fieldName]}
+              {include file="CRM/common/jcalendar.tpl" elementName=$elementName elementId=onbehalf_$fieldName}
             {/if}
             {if $onBehalfOfFields.$fieldName.help_post}
               <br /><span class='description'>{$onBehalfOfFields.$fieldName.help_post}</span>
@@ -221,28 +223,24 @@ function setLocationDetails(contactID , reset) {
     success     : function(data, status) {
       for (var ele in data) {
         if (cj("#"+ ele).hasClass('crm-chain-select-target')) {
-          cj("#"+ ele).data('newVal', data[ele].value).off('.autofill').on('crmOptionsUpdated.autofill', function() {console.log(this.id, cj(this).data('newVal'));
+          cj("#"+ ele).data('newVal', data[ele].value).off('.autofill').on('crmOptionsUpdated.autofill', function() {
             cj(this).off('.autofill').val(cj(this).data('newVal')).change();
           });
         }
+        else if (cj('#' + ele).data('select2')) {
+          cj('#' + ele).select2('val', data[ele].value);
+        }
         if (data[ele].type == 'Radio') {
           if (data[ele].value) {
-            cj("input[name='"+ ele +"']").filter("[value=" + data[ele].value + "]").prop('checked', true);
+            var fldName = ele.replace('onbehalf_', '');
+            cj("input[name='onbehalf["+ fldName +"]']").filter("[value='" + data[ele].value + "']").prop('checked', true);
           }
         }
         else if (data[ele].type == 'CheckBox') {
-          if (data[ele].value) {
-            cj("input[name='"+ ele +"']").prop('checked','checked');
-          }
-        }
-        else if (data[ele].type == 'Multi-Select') {
           for (var selectedOption in data[ele].value) {
-            cj('#' + ele + " option[value='" + selectedOption + "']").prop('selected', true);
+            var fldName = ele.replace('onbehalf_', '');
+            cj("input[name='onbehalf["+ fldName+"]["+ selectedOption +"]']").prop('checked','checked');
           }
-        }
-        else if (data[ele].type == 'Autocomplete-Select') {
-          cj('#' + ele ).val( data[ele].value );
-          cj('#' + ele + '_id').val(data[ele].id);
         }
         else if (data[ele].type == 'AdvMulti-Select') {
           var customFld = ele.replace('onbehalf_', '');
@@ -258,7 +256,10 @@ function setLocationDetails(contactID , reset) {
           }
         }
         else {
-          cj('#' + ele ).val(data[ele].value).change();
+          // do not set defaults to file type fields
+          if (cj('#' + ele).attr('type') != 'file') {
+            cj('#' + ele ).val(data[ele].value).change();
+          }
         }
       }
     },

@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -83,7 +83,7 @@
     } else if ( action == "copy" ) {
       var dialogTitle = "{/literal}{ts escape='js'}Copy to Case{/ts}{literal}";
     } else if ( action == "file" ) {
-      var dialogTitle = "{/literal}{ts escape='js'}File On Case{/ts}{literal}";
+      var dialogTitle = "{/literal}{ts escape='js'}File on Case{/ts}{literal}";
     }
 
     var dataUrl = {/literal}"{crmURL p='civicrm/case/addToCase' q='reset=1' h=0}"{literal};

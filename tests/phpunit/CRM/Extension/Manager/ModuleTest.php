@@ -6,11 +6,8 @@ require_once 'CiviTest/CiviUnitTestCase.php';
  * Class CRM_Extension_Manager_ModuleTest
  */
 class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
-  //@todo make BAO enotice compliant  & remove the line below
-  // WARNING - NEVER COPY & PASTE $_eNoticeCompliant = FALSE
-  // new test classes should be compliant.
-  public $_eNoticeCompliant = FALSE;
-  function setUp() {
+
+  public function setUp() {
     parent::setUp();
     // $query = "INSERT INTO civicrm_domain ( name, version ) VALUES ( 'domain', 3 )";
     // $result = CRM_Core_DAO::executeQuery($query);
@@ -24,15 +21,15 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
     $this->setExtensionSystem($this->system);
   }
 
-  function tearDown() {
+  public function tearDown() {
     parent::tearDown();
     $this->system = NULL;
   }
 
   /**
-   * Install an extension with a valid type name
+   * Install an extension with a valid type name.
    */
-  function testInstallDisableUninstall() {
+  public function testInstallDisableUninstall() {
     $manager = $this->system->getManager();
     $this->assertModuleActiveByName(FALSE, 'moduletest');
 
@@ -71,9 +68,9 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
   }
 
   /**
-   * Install an extension with a valid type name
+   * Install an extension with a valid type name.
    */
-  function testInstallDisableEnable() {
+  public function testInstallDisableEnable() {
     $manager = $this->system->getManager();
     $this->assertModuleActiveByName(FALSE, 'moduletest');
     $this->assertModuleActiveByKey(FALSE, 'test.extension.manager.moduletest');
@@ -112,7 +109,7 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
   /**
    * Install an extension then forcibly remove the code and cleanup DB afterwards.
    */
-  function testInstall_DirtyRemove_Disable_Uninstall() {
+  public function testInstall_DirtyRemove_Disable_Uninstall() {
     // create temporary extension (which can dirtily remove later)
     $this->_createExtension('test.extension.manager.module.auto1', 'module', 'test_extension_manager_module_auto1');
     $mainfile = $this->basedir . '/test.extension.manager.module.auto1/test_extension_manager_module_auto1.php';
@@ -165,7 +162,7 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
   /**
    * Install an extension then forcibly remove the code and cleanup DB afterwards.
    */
-  function testInstall_DirtyRemove_Disable_Restore() {
+  public function testInstall_DirtyRemove_Disable_Restore() {
     // create temporary extension (which can dirtily remove later)
     $this->_createExtension('test.extension.manager.module.auto2', 'module', 'test_extension_manager_module_auto2');
     $mainfile = $this->basedir . '/test.extension.manager.module.auto2/test_extension_manager_module_auto2.php';
@@ -219,14 +216,15 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
 
   /**
    * @param $module
-   * @param array $counts expected hook invocation counts ($hookName => $count)
+   * @param array $counts
+   *   Expected hook invocation counts ($hookName => $count).
    */
-  function assertHookCounts($module, $counts) {
+  public function assertHookCounts($module, $counts) {
     global $_test_extension_manager_moduletest_counts;
     foreach ($counts as $key => $expected) {
       $actual = @$_test_extension_manager_moduletest_counts[$module][$key];
       $this->assertEquals($expected, $actual,
-         sprintf('Expected %d call(s) to hook_civicrm_%s -- found %d', $expected, $key, $actual)
+        sprintf('Expected %d call(s) to hook_civicrm_%s -- found %d', $expected, $key, $actual)
       );
     }
   }
@@ -235,7 +233,7 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
    * @param $expectedIsActive
    * @param $prefix
    */
-  function assertModuleActiveByName($expectedIsActive, $prefix) {
+  public function assertModuleActiveByName($expectedIsActive, $prefix) {
     $activeModules = CRM_Core_PseudoConstant::getModuleExtensions(TRUE); // FIXME
     foreach ($activeModules as $activeModule) {
       if ($activeModule['prefix'] == $prefix) {
@@ -250,10 +248,10 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
    * @param $expectedIsActive
    * @param $key
    */
-  function assertModuleActiveByKey($expectedIsActive, $key) {
+  public function assertModuleActiveByKey($expectedIsActive, $key) {
     foreach (CRM_Core_Module::getAll() as $module) {
       if ($module->name == $key) {
-        $this->assertEquals((bool)$expectedIsActive, (bool)$module->is_active);
+        $this->assertEquals((bool) $expectedIsActive, (bool) $module->is_active);
         return;
       }
     }
@@ -266,7 +264,7 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
    * @param $file
    * @param string $template
    */
-  function _createExtension($key, $type, $file, $template = self::MODULE_TEMPLATE) {
+  public function _createExtension($key, $type, $file, $template = self::MODULE_TEMPLATE) {
     $basedir = $this->basedir;
     mkdir("$basedir/$key");
     file_put_contents("$basedir/$key/info.xml", "<extension key='$key' type='$type'><file>$file</file></extension>");
@@ -277,10 +275,13 @@ class CRM_Extension_Manager_ModuleTest extends CiviUnitTestCase {
 
   /**
    * @param $module
-   * @param $name
+   * @param string $name
    */
   public static function incHookCount($module, $name) {
     global $_test_extension_manager_moduletest_counts;
+    if (!isset($_test_extension_manager_moduletest_counts[$module][$name])) {
+      $_test_extension_manager_moduletest_counts[$module][$name] = 0;
+    }
     $_test_extension_manager_moduletest_counts[$module][$name] = 1 + (int) $_test_extension_manager_moduletest_counts[$module][$name];
   }
 

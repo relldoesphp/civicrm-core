@@ -2,7 +2,7 @@
 {$formValues.receipt_text_signup}
 {elseif $formValues.receipt_text_renewal}
 {$formValues.receipt_text_renewal}
-{else}{ts}Thanks for your support.{/ts}{/if}
+{else}{ts}Thank you for your support.{/ts}{/if}
 
 {if ! $cancelled}{ts}Please print this receipt for your records.{/ts}
 
@@ -69,7 +69,7 @@
 
 {ts}Amount{/ts}: {$formValues.total_amount|crmMoney}
 {if $receive_date}
-{ts}Received Date{/ts}: {$receive_date|truncate:10:''|crmDate}
+{ts}Date Received{/ts}: {$receive_date|truncate:10:''|crmDate}
 {/if}
 {if $formValues.paidBy}
 {ts}Paid By{/ts}: {$formValues.paidBy}

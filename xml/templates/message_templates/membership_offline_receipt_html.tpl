@@ -26,7 +26,7 @@
     {elseif $formValues.receipt_text_renewal}
      <p>{$formValues.receipt_text_renewal|htmlize}</p>
     {else}
-     <p>{ts}Thanks for your support.{/ts}</p>
+     <p>{ts}Thank you for your support.{/ts}</p>
     {/if}
     {if ! $cancelled}
      <p>{ts}Please print this receipt for your records.{/ts}</p>
@@ -146,7 +146,7 @@
        {if $dataArray}
         <tr>
          <td {$labelStyle}>
-          {ts}Amount Before Tax : {/ts}
+          {ts}Amount Before Tax:{/ts}
          </td>
          <td {$valueStyle}>
           {$formValues.total_amount-$totalTaxAmount|crmMoney}
@@ -186,7 +186,7 @@
        {if $receive_date}
         <tr>
          <td {$labelStyle}>
-          {ts}Received Date{/ts}
+          {ts}Date Received{/ts}
          </td>
          <td {$valueStyle}>
           {$receive_date|truncate:10:''|crmDate}

@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,7 +22,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'WebTest/Import/ImportCiviSeleniumTestCase.php';
 
@@ -35,10 +35,10 @@ class WebTest_Import_SavedMappingTest extends ImportCiviSeleniumTestCase {
     parent::setUp();
   }
 
-  /*
-     * Function to test Saved Import Mapping for Individuals.
-     */
-  function testSaveIndividualMapping() {
+  /**
+   * Test Saved Import Mapping for Individuals.
+   */
+  public function testSaveIndividualMapping() {
 
     // Logging in.
     $this->webtestLogin();
@@ -82,13 +82,12 @@ class WebTest_Import_SavedMappingTest extends ImportCiviSeleniumTestCase {
     $this->importContacts($headers, $rows, 'Individual', 'Skip', array(), $other);
   }
 
-  /*
-     *  Helper function to provide csv data for Individuals contact import.
-     */
   /**
+   * Helper function to provide csv data for Individuals contact import.
+   *
    * @return array
    */
-  function _individualCSVData() {
+  public function _individualCSVData() {
     $headers = array(
       'individual_prefix' => 'Individual Prefix',
       'first_name' => 'First Name',
@@ -117,7 +116,7 @@ class WebTest_Import_SavedMappingTest extends ImportCiviSeleniumTestCase {
         'address_2' => 'Add 2',
         'city' => 'Watson',
         'state' => 'NY',
-        'country' => 'United States',
+        'country' => 'UNITED STATES',
       ),
       array(
         'individual_prefix' => 'Mr.',
@@ -131,11 +130,11 @@ class WebTest_Import_SavedMappingTest extends ImportCiviSeleniumTestCase {
         'address_2' => 'Add 2',
         'city' => 'Watson',
         'state' => 'NY',
-        'country' => 'United States',
+        'country' => 'UNITED STATES',
       ),
     );
 
     return array($headers, $rows);
   }
-}
 
+}

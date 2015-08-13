@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -35,7 +35,7 @@ class WebTest_Contribute_PCPAddTest extends CiviSeleniumTestCase {
     parent::setUp();
   }
 
-  function testPCPAdd() {
+  public function testPCPAdd() {
     // open browser, login
     $this->webtestLogin();
 
@@ -176,7 +176,7 @@ class WebTest_Contribute_PCPAddTest extends CiviSeleniumTestCase {
     //Find Contribution
     $this->openCiviPage("contribute/search", "reset=1", "contribution_date_low");
     $this->waitForElementPresent('contribution_pcp_made_through_id');
-    $this->select('contribution_pcp_made_through_id', "label={$pcpTitle}");
+    $this->select2('pcp_made_through_id', $lastName . ', ' . $firstName);
 
     $this->clickLink("_qf_Search_refresh", "xpath=//table[@class='selector row-highlight']/tbody/tr[1]/td[11]/span/a[1][text()='View']");
     $this->click("xpath=//table[@class='selector row-highlight']/tbody/tr[1]/td[11]/span/a[1][text()='View']");
@@ -193,12 +193,12 @@ class WebTest_Contribute_PCPAddTest extends CiviSeleniumTestCase {
 
     //Check for SoftCredit
     $softCreditor = "{$firstName} {$lastName}";
-    $this->verifyText("xpath=//div['PCPView']/div[2]/table[@class='crm-info-panel']/tbody/tr[2]/td[2]/a", preg_quote($softCreditor), 'In line ' . __LINE__);
+    $this->verifyText("xpath=//div['PCPView']/div[2]/table[@class='crm-info-panel']/tbody/tr[2]/td[2]/a", preg_quote($softCreditor));
 
     // Check PCP Summary Report
     $this->openCiviPage('report/instance/16', 'reset=1');
     $this->verifyText("PCP", preg_quote($pcpTitle));
     $this->verifyText("PCP", preg_quote("{$lastName}, {$firstName}"));
   }
-}
 
+}

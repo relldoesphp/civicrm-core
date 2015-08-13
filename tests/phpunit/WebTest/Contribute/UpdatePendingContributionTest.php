@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,7 +22,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'CiviTest/CiviSeleniumTestCase.php';
 
@@ -35,7 +35,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
     parent::setUp();
   }
 
-  function testUpdatePendingContribution() {
+  public function testUpdatePendingContribution() {
     $this->webtestLogin();
 
     //Offline Pay Later Contribution
@@ -44,7 +44,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
     //Online Pay Later Contribution
     $this->_testOnlineContribution($contact);
     $this->openCiviPage("contribute/search", "reset=1", "contribution_date_low");
-
+    $this->click("xpath=//tr/td[1]/label[contains(text(), 'Contribution is a Test?')]/../../td[2]/label[contains(text(), 'Yes')]/preceding-sibling::input[1]");
     $this->type("sort_name", $contact['sort_name']);
     $this->click("_qf_Search_refresh");
 
@@ -74,9 +74,10 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
   }
 
   /**
-   * @return array of contact details
+   * @return array
+   *   Array of contact details
    */
-  function _testOfflineContribution() {
+  public function _testOfflineContribution() {
     // Create a contact to be used as soft creditor
     $softCreditFname = substr(sha1(rand()), 0, 7);
     $softCreditLname = substr(sha1(rand()), 0, 7);
@@ -88,7 +89,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
     $contact = $this->createDialogContact();
 
     // select financial type
-    $this->select( "financial_type_id", "value=1" );
+    $this->select("financial_type_id", "value=1");
 
     // fill in Received Date
     $this->webtestFillDate('receive_date');
@@ -126,7 +127,6 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
     $this->type("invoice_id", time());
     $this->webtestFillDate('thankyou_date');
 
-
     //Premium section
     $this->click("Premium");
     $this->waitForElementPresent("fulfilled_date");
@@ -153,7 +153,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
       'Financial Type' => 'Donation',
       'Total Amount' => '100.00',
       'Contribution Status' => 'Pending',
-      'Paid By' => 'Check',
+      'Payment Method' => 'Check',
       'Check Number' => 'check #1041',
     );
     $this->webtestVerifyTabularData($expected);
@@ -183,7 +183,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
   /**
    * @param array $contact
    */
-  function _testOnlineContribution($contact) {
+  public function _testOnlineContribution($contact) {
 
     // Use default payment processor
     $processorName = 'Test Processor';
@@ -228,7 +228,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
 
     //logout
     $this->webtestLogout();
-    $this->openCiviPage("contribute/transact", "reset=1&id=$pageId", "_qf_Main_upload-bottom");
+    $this->openCiviPage("contribute/transact", "reset=1&id=$pageId&action=preview", "_qf_Main_upload-bottom");
 
     $this->type("email-5", $contact['email']);
 
@@ -255,7 +255,7 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
 
     //Find Contribution
     $this->openCiviPage("contribute/search", "reset=1", "contribution_date_low");
-
+    $this->click("xpath=//tr/td[1]/label[contains(text(), 'Contribution is a Test?')]/../../td[2]/label[contains(text(), 'Yes')]/preceding-sibling::input[1]");
     $this->type("sort_name", $contact['sort_name']);
     $this->clickLink("_qf_Search_refresh", "xpath=//div[@id='contributionSearch']//table//tbody/tr[2]/td[11]/span/a[text()='View']");
     $this->clickLink("xpath=//div[@id='contributionSearch']//table//tbody/tr[2]/td[11]/span/a[text()='View']", "_qf_ContributionView_cancel-bottom", FALSE);
@@ -268,5 +268,5 @@ class WebTest_Contribute_UpdatePendingContributionTest extends CiviSeleniumTestC
     );
     $this->webtestVerifyTabularData($expected);
   }
-}
 
+}

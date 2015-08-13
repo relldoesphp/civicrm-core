@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,13 +23,12 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2014
- *
+ * @copyright CiviCRM LLC (c) 2004-2015
  */
 
 /**
@@ -49,12 +48,11 @@ class CRM_Contribute_Form_Task_Status extends CRM_Contribute_Form_Task {
   protected $_rows;
 
   /**
-   * build all the data structures needed to build the form
+   * Build all the data structures needed to build the form.
    *
    * @return void
-   * @access public
    */
-  function preProcess() {
+  public function preProcess() {
     $id = CRM_Utils_Request::retrieve('id', 'Positive',
       $this, FALSE
     );
@@ -88,9 +86,8 @@ AND    {$this->_componentClause}";
   }
 
   /**
-   * Build the form
+   * Build the form object.
    *
-   * @access public
    *
    * @return void
    */
@@ -124,10 +121,10 @@ AND    co.id IN ( $contribIDs )";
     );
 
     // build a row for each contribution id
-    $this->_rows   = array();
-    $attributes    = CRM_Core_DAO::getAttribute('CRM_Contribute_DAO_Contribution');
-    $defaults      = array();
-    $now           = date("m/d/Y");
+    $this->_rows = array();
+    $attributes = CRM_Core_DAO::getAttribute('CRM_Contribute_DAO_Contribution');
+    $defaults = array();
+    $now = date("m/d/Y");
     $paidByOptions = array('' => ts('- select -')) + CRM_Contribute_PseudoConstant::paymentInstrument();
 
     while ($dao->fetch()) {
@@ -143,7 +140,6 @@ AND    co.id IN ( $contribIDs )";
         array('CRM_Contribute_DAO_Contribution', $dao->contribution_id, 'trxn_id')
       );
 
-
       $row['fee_amount'] = &$this->add('text', "fee_amount_{$row['contribution_id']}", ts('Fee Amount'),
         $attributes['fee_amount']
       );
@@ -158,7 +154,7 @@ AND    co.id IN ( $contribIDs )";
       $this->add("text", "check_number_{$row['contribution_id']}", ts('Check Number'));
       $defaults["check_number_{$row['contribution_id']}"] = $dao->check_no;
 
-      $this->add("select", "payment_instrument_id_{$row['contribution_id']}", ts('Paid By'), $paidByOptions);
+      $this->add("select", "payment_instrument_id_{$row['contribution_id']}", ts('Payment Method'), $paidByOptions);
       $defaults["payment_instrument_id_{$row['contribution_id']}"] = $dao->paid_by;
 
       $this->_rows[] = $row;
@@ -183,15 +179,15 @@ AND    co.id IN ( $contribIDs )";
   }
 
   /**
-   * global validation rules for the form
+   * Global validation rules for the form.
    *
-   * @param array $fields posted values of the form
+   * @param array $fields
+   *   Posted values of the form.
    *
-   * @return array list of errors to be posted back to the form
-   * @static
-   * @access public
+   * @return array
+   *   list of errors to be posted back to the form
    */
-  static function formRule($fields) {
+  public static function formRule($fields) {
     $seen = $errors = array();
     foreach ($fields as $name => $value) {
       if (strpos($name, 'trxn_id_') !== FALSE) {
@@ -207,7 +203,7 @@ AND    co.id IN ( $contribIDs )";
         $contribID = substr($name, 13);
 
         if ($fields["payment_instrument_id_{$contribID}"] != CRM_Core_OptionGroup::getValue('payment_instrument', 'Check', 'name')) {
-          $errors["payment_instrument_id_{$contribID}"] = ts("Paid By should be Check when a check number is entered for a contribution.");
+          $errors["payment_instrument_id_{$contribID}"] = ts("Payment Method should be Check when a check number is entered for a contribution.");
         }
       }
     }
@@ -215,9 +211,8 @@ AND    co.id IN ( $contribIDs )";
   }
 
   /**
-   * process the form after the input has been submitted and validated
+   * Process the form after the input has been submitted and validated.
    *
-   * @access public
    *
    * @return void
    */
@@ -231,8 +226,8 @@ AND    co.id IN ( $contribIDs )";
 
     // get the missing pieces for each contribution
     $contribIDs = implode(',', $this->_contributionIds);
-    $details    = self::getDetails($contribIDs);
-    $template   = CRM_Core_Smarty::singleton();
+    $details = self::getDetails($contribIDs);
+    $template = CRM_Core_Smarty::singleton();
 
     // for each contribution id, we just call the baseIPN stuff
     foreach ($this->_rows as $row) {
@@ -271,7 +266,8 @@ AND    co.id IN ( $contribIDs )";
       // status is not pending
       if ($contribution->contribution_status_id != array_search('Pending',
           $contributionStatuses
-        )) {
+        )
+      ) {
         $transaction->commit();
         continue;
       }
@@ -292,6 +288,7 @@ AND    co.id IN ( $contribIDs )";
       }
       $input['trxn_date'] = CRM_Utils_Date::processDate($params["trxn_date_{$row['contribution_id']}"]);
 
+      // @todo calling baseIPN like this is a pattern in it's last gasps. Call contribute.completetransaction api.
       $baseIPN->completeTransaction($input, $ids, $objects, $transaction, FALSE);
 
       // reset template values before processing next transactions
@@ -306,7 +303,7 @@ AND    co.id IN ( $contribIDs )";
    *
    * @return array
    */
-  static function &getDetails($contributionIDs) {
+  public static function &getDetails($contributionIDs) {
     $query = "
 SELECT    c.id              as contribution_id,
           c.contact_id      as contact_id     ,
@@ -343,5 +340,5 @@ WHERE     c.id IN ( $contributionIDs )";
     }
     return $rows;
   }
-}
 
+}

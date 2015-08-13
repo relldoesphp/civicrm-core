@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,7 +22,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'CiviTest/CiviSeleniumTestCase.php';
 
@@ -35,7 +35,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     parent::setUp();
   }
 
-  function testAddPriceSet() {
+  public function testAddPriceSet() {
     // Log in using webtestLogin() method
     $this->webtestLogin();
 
@@ -74,7 +74,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
    * @param $setHelp
    * @param null $financialType
    */
-  function _testAddSet($setTitle, $usedFor, $setHelp, $financialType = NULL) {
+  public function _testAddSet($setTitle, $usedFor, $setHelp, $financialType = NULL) {
     $this->openCiviPage("admin/price", "reset=1&action=add", '_qf_Set_next-bottom');
 
     // Enter Priceset fields (Title, Used For ...)
@@ -101,7 +101,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
    * @param $financialType
    * @param bool $dateSpecificFields
    */
-  function _testAddPriceFields(&$fields, &$validateString, $financialType, $dateSpecificFields = FALSE) {
+  public function _testAddPriceFields(&$fields, &$validateString, $financialType, $dateSpecificFields = FALSE) {
     $validateStrings[] = $financialType;
     $sid = $this->urlArg('sid');
     $this->openCiviPage('admin/price/field', "reset=1&action=add&sid=$sid", 'label');
@@ -187,7 +187,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
   /**
    * @return string
    */
-  function _testAddFinancialType() {
+  public function _testAddFinancialType() {
     //Add new Financial Type
     $financialType['name'] = 'FinancialType ' . substr(sha1(rand()), 0, 4);
     $financialType['is_deductible'] = TRUE;
@@ -198,9 +198,9 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
 
   /**
    * @param $validateStrings
-   * @param $sid
+   * @param int $sid
    */
-  function _testVerifyPriceSet($validateStrings, $sid) {
+  public function _testVerifyPriceSet($validateStrings, $sid) {
     // verify Price Set at Preview page
     // start at Manage Price Sets listing
     $this->openCiviPage("admin/price", "reset=1");
@@ -211,7 +211,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     $this->assertStringsPresent($validateStrings);
   }
 
-  function testContributeOfflineWithPriceSet() {
+  public function testContributeOfflineWithPriceSet() {
     // Log in using webtestLogin() method
     $this->webtestLogin();
 
@@ -312,7 +312,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     }
   }
 
-  function testContributeOnlineWithPriceSet() {
+  public function testContributeOnlineWithPriceSet() {
     $this->webtestLogin();
 
     //add financial type of account type expense
@@ -374,7 +374,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     $this->webtestLogout();
 
     //Open Live Contribution Page
-    $this->openCiviPage('contribute/transact', "reset=1&id=$pageId", '_qf_Main_upload-bottom');
+    $this->openCiviPage('contribute/transact', "reset=1&id=$pageId&action=preview", '_qf_Main_upload-bottom');
 
     $firstName = 'Ma' . substr(sha1(rand()), 0, 4);
     $lastName = 'An' . substr(sha1(rand()), 0, 7);
@@ -419,7 +419,8 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     //Find Contribution
     $this->openCiviPage("contribute/search", "reset=1", 'contribution_date_low');
 
-    $this->type('sort_name', "$firstName $lastName");
+    $this->click("xpath=//tr/td[1]/label[contains(text(), 'Contribution is a Test?')]/../../td[2]/label[contains(text(), 'Yes')]/preceding-sibling::input[1]");
+    $this->type('sort_name', "$lastName $firstName");
     $this->clickLink('_qf_Search_refresh', "xpath=//div[@id='contributionSearch']//table//tbody/tr[1]/td[11]/span/a[text()='View']");
     $this->clickLink("xpath=//div[@id='contributionSearch']//table//tbody/tr[1]/td[11]/span/a[text()='View']", "_qf_ContributionView_cancel-bottom", FALSE);
 
@@ -427,14 +428,16 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     $expected = array(
       'From' => "{$firstName} {$lastName}",
       'Financial Type' => $financialType,
-      'Net Amount' => '$ 590.00',
+      // as per changes made in CRM-15407
+      'Fee Amount' => '$ 1.50',
+      'Net Amount' => '$ 588.50',
       'Contribution Status' => 'Completed',
     );
     $this->webtestVerifyTabularData($expected);
 
   }
 
-  function testContributeWithDateSpecificPriceSet() {
+  public function testContributeWithDateSpecificPriceSet() {
     $this->webtestLogin();
 
     //add financial type of account type expense
@@ -493,7 +496,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     $this->webtestLogout();
 
     //Open Live Contribution Page
-    $this->openCiviPage('contribute/transact', "reset=1&id=$pageId", '_qf_Main_upload-bottom');
+    $this->openCiviPage('contribute/transact', "reset=1&id=$pageId&action=preview", '_qf_Main_upload-bottom');
 
     $firstName = 'Ma' . substr(sha1(rand()), 0, 4);
     $lastName = 'An' . substr(sha1(rand()), 0, 7);
@@ -534,8 +537,8 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
 
     //Find Contribution
     $this->openCiviPage("contribute/search", "reset=1", 'contribution_date_low');
-
-    $this->type('sort_name', "$firstName $lastName");
+    $this->click("xpath=//tr/td[1]/label[contains(text(), 'Contribution is a Test?')]/../../td[2]/label[contains(text(), 'Yes')]/preceding-sibling::input[1]");
+    $this->type('sort_name', "$lastName $firstName");
     $this->clickLink('_qf_Search_refresh', "xpath=//div[@id='contributionSearch']//table//tbody/tr[1]/td[11]/span/a[text()='View']", FALSE);
     $this->clickLink("xpath=//div[@id='contributionSearch']//table//tbody/tr[1]/td[11]/span/a[text()='View']", '_qf_ContributionView_cancel-bottom', FALSE);
 
@@ -543,13 +546,15 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
     $expected = array(
       'From' => "{$firstName} {$lastName}",
       'Financial Type' => $financialType,
-      'Net Amount' => '$ 65.00',
+      // as per changes made in CRM-15407
+      'Fee Amount' => '$ 1.50',
+      'Net Amount' => '$ 63.50',
       'Contribution Status' => 'Completed',
     );
     $this->webtestVerifyTabularData($expected);
   }
 
-  function testContributeOfflineforSoftcreditwithApi() {
+  public function testContributeOfflineforSoftcreditwithApi() {
     // Log in using webtestLogin() method
     $this->webtestLogin();
 
@@ -634,7 +639,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
       'From' => $contact['display_name'],
       'Financial Type' => $financialType,
       'Contribution Amount' => 'Contribution Total: $ 590.00',
-      'Paid By' => 'Check',
+      'Payment Method' => 'Check',
       'Check Number' => '1041',
       'Contribution Status' => 'Completed',
     );
@@ -699,7 +704,7 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
       'Financial Type' => $fields['values'][$fields['id']]['financial_type'],
       'Contribution Amount' => $fields['values'][$fields['id']]['total_amount'],
       'Contribution Status' => $fields['values'][$fields['id']]['contribution_status'],
-      'Paid By' => $fields['values'][$fields['id']]['contribution_payment_instrument'],
+      'Payment Method' => $fields['values'][$fields['id']]['payment_instrument'],
       'Check Number' => $fields['values'][$fields['id']]['contribution_check_number'],
     );
 
@@ -715,5 +720,5 @@ class WebTest_Contribute_AddPricesetTest extends CiviSeleniumTestCase {
       $this->verifyText("css=table.crm-soft-credit-listing", preg_quote($value));
     }
   }
-}
 
+}

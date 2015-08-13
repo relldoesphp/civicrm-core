@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -29,7 +29,7 @@
       <li id="crm-qsearch" class="menumain">
         <form action="{crmURL p='civicrm/contact/search/advanced' h=0 }" name="search_block" id="id_search_block" method="post">
           <div id="quickSearch">
-            <input type="text" class="form-text" id="sort_name_navigation" placeholder="{ts}Find Contacts{/ts}" name="sort_name" style="width: 12em;" />
+            <input type="text" class="form-text" id="sort_name_navigation" placeholder="{ts}Contacts{/ts}" name="sort_name" style="width: 6em;" />
             <input type="text" id="sort_contact_id" style="display: none" />
             <input type="hidden" name="hidden_location" value="1" />
             <input type="hidden" name="qfKey" value="" />
@@ -38,7 +38,7 @@
         </form>
         <ul>
           <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" checked="checked" value="" name="quickSearchField">{ts}Name/Email{/ts}</label></li>
-          <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" value="contact_id" name="quickSearchField">{ts}CiviCRM ID{/ts}</label></li>
+          <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" value="contact_id" name="quickSearchField">{ts}Contact ID{/ts}</label></li>
           <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" value="external_identifier" name="quickSearchField">{ts}External ID{/ts}</label></li>
           <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" value="first_name" name="quickSearchField">{ts}First Name{/ts}</label></li>
           <li><label class="crm-quickSearchField"><input type="radio" data-tablename="cc" value="last_name" name="quickSearchField">{ts}Last Name{/ts}</label></li>
@@ -111,7 +111,7 @@ $('#civicrm-menu').ready(function() {
           response(ret);
         })
       },
-      focus: function (event, ui){
+      focus: function (event, ui) {
         return false;
       },
       select: function (event, ui) {
@@ -125,9 +125,19 @@ $('#civicrm-menu').ready(function() {
     })
     .keydown(function() {
       $.Menu.closeAll();
+    })
+    .on('focus', function() {
+      if ($(this).attr('style').indexOf('14em') < 0) {
+        $(this).animate({width: '14em'});
+      }
+    })
+    .on('blur', function() {
+      // Shrink if no input and menu is not open
+      if (!$(this).val().length && $(this).attr('style').indexOf('6em') < 0 && !$('.crm-quickSearchField:visible', '#root-menu-div').length) {
+        $(this).animate({width: '6em'});
+      }
     });
   $('.crm-hidemenu').click(function(e) {
-    $.Menu.closeAll();
     $('#civicrm-menu').slideUp();
     if ($('#crm-notification-container').length) {
       var alert = CRM.alert({/literal}'<a href="#" id="crm-restore-menu" style="text-align: center; margin-top: -8px;">{ts escape='js'}Restore CiviCRM Menu{/ts}</a>'{literal}, '', 'none', {expires: 10000});
@@ -161,6 +171,8 @@ $('#civicrm-menu').ready(function() {
       return false;
     }
   });
+  // Close menu after selecting an item
+  $('#root-menu-div').on('click', 'a', $.Menu.closeAll);
 });
 $('#civicrm-menu').menuBar({arrowSrc: CRM.config.resourceBase + 'packages/jquery/css/images/arrow.png'});
 })(CRM.$);{/literal}

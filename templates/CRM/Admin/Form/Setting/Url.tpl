@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -87,13 +87,6 @@
             <p class="description font-red">{ts}{$verifySSL_description}{/ts}</p>
         </td>
     </tr>
-    <tr class="crm-miscellaneous-form-block-cvv-backoffice-required">
-          <td class="label">{$form.cvv_backoffice_required.label}</td>
-          <td>
-            {$form.cvv_backoffice_required.html}<br />
-            <p class="description">{ts}{$cvv_backoffice_required_description}{/ts}</p>
-          </td>
-        </tr>
 </table>
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
 </div>

@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -122,7 +122,7 @@
           }
 
         if ( showError ) {
-          cj('#validate_pricefield').show().html("<span class='icon red-icon alert-icon'></span>{/literal}{ts escape='js'}This Option is already full for this event.{/ts}{literal}");
+          cj('#validate_pricefield').show().html("<span class='icon red-icon ui-icon-alert'></span>{/literal}{ts escape='js'}This Option is already full for this event.{/ts}{literal}");
         }
         else {
           cj('#validate_pricefield').hide( ).html('');
@@ -169,10 +169,6 @@
   {/if}
 
   {include file="CRM/Event/Form/EventFees.tpl"}
-
-{* Ajax callback for custom data snippet *}
-{elseif $cdType}
-  {include file="CRM/Custom/Form/CustomData.tpl"}
 
 {* Main event form template *}
 {else}
@@ -340,17 +336,6 @@
 
         var $form = $('form.{/literal}{$form.formClass}{literal}');
 
-        // don't show cart related statuses if it's disabled
-        {/literal}{if !$enableCart}{literal}
-          var pendingInCartStatusId = {/literal}{$pendingInCartStatusId}{literal};
-          $("#status_id option[value='" + pendingInCartStatusId + "']").remove();
-        {/literal}{/if}{literal}
-
-        {/literal}{if $action eq 1}{literal}
-          var pendingRefundStatusId = {/literal}{$pendingRefundStatusId}{literal};
-          $("#status_id option[value='" + pendingRefundStatusId + "']").remove();
-        {/literal}{/if}{literal}
-
         // Handle event selection
         $('#event_id', $form).change(function() {
           var eventId = $(this).val();
@@ -384,6 +369,9 @@
         if ($('#discount_id', $form).val()) {
           buildFeeBlock($('#discount_id', $form).val());
         }
+        $($form).on('change', '#discount_id', function() {
+          buildFeeBlock($(this).val());
+        });
 
         function buildRoleCustomData() {
           var roleId = $('select[name^=role_id]', $form).val().join();

@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -58,15 +58,17 @@
         <tr id="payLaterFields" class="crm-contribution-form-block-payLaterFields"><td>&nbsp;</td>
             <td>
             <table class="form-layout">
-                <tr class="crm-contribution-contributionpage-amount-form-block-pay_later_text"><th scope="row" class="label">{$form.pay_later_text.label} <span class="marker" title="This field is required.">*</span> {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_contribution_page' field='pay_later_text' id=$contributionPageID}{/if}</th>
+                <tr class="crm-contribution-contributionpage-amount-form-block-pay_later_text"><th scope="row" class="label">{$form.pay_later_text.label} <span class="crm-marker" title="This field is required.">*</span> {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_contribution_page' field='pay_later_text' id=$contributionPageID}{/if}</th>
                 <td>{$form.pay_later_text.html|crmAddClass:big}<br />
                     <span class="description">{ts}Text displayed next to the checkbox for the 'pay later' option on the contribution form. You may include HTML formatting tags.{/ts}</span></td></tr>
-                <tr class="crm-contribution-contributionpage-amount-form-block-pay_later_receipt"><th scope="row" class="label">{$form.pay_later_receipt.label} <span class="marker" title="This field is required.">*</span> {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_contribution_page' field='pay_later_receipt' id=$contributionPageID}{/if}</th>
+                <tr class="crm-contribution-contributionpage-amount-form-block-pay_later_receipt"><th scope="row" class="label">{$form.pay_later_receipt.label} <span class="crm-marker" title="This field is required.">*</span> {if $action == 2}{include file='CRM/Core/I18n/Dialog.tpl' table='civicrm_contribution_page' field='pay_later_receipt' id=$contributionPageID}{/if}</th>
                 <td>{$form.pay_later_receipt.html|crmAddClass:big}<br />
                   <span class="description">{ts}Instructions added to Confirmation and Thank-you pages, as well as the confirmation email, when the user selects the 'pay later' option (e.g. 'Mail your check to ... within 3 business days.').{/ts}</span></td></tr>
 
                 <tr><th scope="row" class="label">{$form.is_billing_required.label}</th>
-                <td>{$form.is_billing_required.html}</td></tr>
+                <td>{$form.is_billing_required.html}<br />
+                    <span class="description">{ts}Check this box to require users who select the pay later option to provide billing name and address.{/ts}</span>
+                </td></tr>
             </table>
             </td>
         </tr>
@@ -98,7 +100,7 @@
         <tr id="recurFields" class="crm-contribution-form-block-recurFields"><td>&nbsp;</td>
                <td>
                   <table class="form-layout-compressed">
-            <tr class="crm-contribution-form-block-recur_frequency_unit"><th scope="row" class="label">{$form.recur_frequency_unit.label}<span class="marker" title="This field is required.">*</span></th>
+            <tr class="crm-contribution-form-block-recur_frequency_unit"><th scope="row" class="label">{$form.recur_frequency_unit.label}<span class="crm-marker" title="This field is required.">*</span></th>
                         <td>{$form.recur_frequency_unit.html}<br />
                         <span class="description">{ts}Select recurring units supported for recurring payments.{/ts}</span></td>
                     </tr>
@@ -130,7 +132,7 @@
             </tr>
             <tr id="pledgeFields" class="crm-contribution-form-block-pledgeFields"><td></td><td>
                 <table class="form-layout-compressed">
-                    <tr class="crm-contribution-form-block-pledge_frequency_unit"><th scope="row" class="label">{$form.pledge_frequency_unit.label}<span class="marker"> *</span></th>
+                    <tr class="crm-contribution-form-block-pledge_frequency_unit"><th scope="row" class="label">{$form.pledge_frequency_unit.label}<span class="crm-marker"> *</span></th>
                         <td>{$form.pledge_frequency_unit.html}<br />
                             <span class="description">{ts}Which frequencies can the user pick from (e.g. every 'week', every 'month', every 'year')?{/ts}</span></td>
                     </tr>
@@ -140,15 +142,15 @@
                     </tr>
                     <tr class="crm-contribution-form-block-initial_reminder_day"><th scope="row" class="label">{$form.initial_reminder_day.label}</th>
                         <td>{$form.initial_reminder_day.html}
-                            <span class="label">{ts}days prior to each scheduled payment due date.{/ts}</span></td>
+                            <span class="label">{ts}Days prior to each scheduled payment due date.{/ts}</span></td>
                     </tr>
                     <tr class="crm-contribution-form-block-max_reminders"><th scope="row" class="label">{$form.max_reminders.label}</th>
                         <td>{$form.max_reminders.html}
-                            <span class="label">{ts}reminders for each scheduled payment.{/ts}</span></td>
+                            <span class="label">{ts}Reminders for each scheduled payment.{/ts}</span></td>
                     </tr>
                     <tr class="crm-contribution-form-block-additional_reminder_day"><th scope="row" class="label">{$form.additional_reminder_day.label}</th>
                         <td>{$form.additional_reminder_day.html}
-                            <span class="label">{ts}days after the last one sent, up to the maximum number of reminders.{/ts}</span></td>
+                            <span class="label">{ts}Days after the last one sent, up to the maximum number of reminders.{/ts}</span></td>
                     </tr>
                 </table>
                 </td>
@@ -156,7 +158,7 @@
             {/if}
 
       <tr class="crm-contribution-form-block-amount_label">
-              <th scope="row" class="label" width="20%">{$form.amount_label.label}<span class="marker"> *</span></th>
+              <th scope="row" class="label" width="20%">{$form.amount_label.label}<span class="crm-marker"> *</span></th>
         <td>{$form.amount_label.html}</td>
       </tr>
             <tr class="crm-contribution-form-block-is_allow_other_amount"><th scope="row" class="label" width="20%">{$form.is_allow_other_amount.label}</th>

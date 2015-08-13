@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,7 +22,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'CiviTest/CiviSeleniumTestCase.php';
 
@@ -35,7 +35,7 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     parent::setUp();
   }
 
-  function testSearchProfile() {
+  public function testSearchProfile() {
     $this->webtestLogin();
 
     // enable county field
@@ -58,7 +58,7 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     //click on save
     $this->click('_qf_Group_next-bottom');
     $this->waitForPageToLoad($this->getTimeoutMsec());
-    $this->waitForElementPresent("xpath=//a/span[text()='Add Field']");
+    $this->waitForElementPresent("_qf_Field_next-bottom");
 
     //check for  profile create
     $this->waitForText('crm-notification-container', "Your CiviCRM Profile '{$profileTitle}' has been added. You can add fields to this profile now.");
@@ -81,7 +81,6 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->click('_qf_Field_next_new-bottom');
     //check for field add
     $this->waitForText('crm-notification-container', "Your CiviCRM Profile Field 'Last Name' has been saved to '$profileTitle'.");
-    $this->waitForText('crm-notification-container', 'You can add another profile field.');
 
     // Add Email field.
     $this->click('field_name[0]');
@@ -97,7 +96,6 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->click('_qf_Field_next_new-bottom');
     //check for field add
     $this->waitForText('crm-notification-container', "Your CiviCRM Profile Field 'Email' has been saved to '$profileTitle'.");
-    $this->waitForText('crm-notification-container', 'You can add another profile field.');
 
     // Add Sample Custom Field.
     $this->click('field_name[0]');
@@ -160,12 +158,12 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->click('in_selector');
 
     // click on save
-    $this->clickLink('_qf_Field_next-bottom', "xpath=//div[@id='field_page']/div[1]/a[4]/span[text()='Use (create mode)']", FALSE);
+    $this->clickLink('_qf_Field_next-bottom', "xpath=//div[@id='field_page']/div[1]/a[4]/span[text()=' Use (create mode)']", FALSE);
 
     $uselink = explode('?', $this->getAttribute("xpath=//*[@id='field_page']/div[1]/a[4]@href"));
     $this->openCiviPage('profile/create', "$uselink[1]", '_qf_Edit_next');
     $lastName = substr(sha1(rand()), 0, 7);
-    $orgName = 'Organisation'.substr(sha1(rand()), 0, 7);
+    $orgName = 'Organisation' . substr(sha1(rand()), 0, 7);
 
     // Fill Last Name
     $this->type('last_name', $lastName);
@@ -175,7 +173,7 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->click('CIVICRM_QFID_Edu_2');
 
     // fill country, state, county
-    $this->select('country-Primary', "United States");
+    $this->select('country-Primary', "UNITED STATES");
 
     // wait for state data to be populated
     $this->waitForElementPresent("xpath=//select[@id='state_province-Primary']/option[text()='California']");
@@ -202,7 +200,7 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->type('email-Primary', "jhon@$lastName.com");
 
     // Fill state, county, country
-    $this->select('country-Primary', "United States");
+    $this->select('country-Primary', "UNITED STATES");
 
     // wait for state data to be populated
     $this->waitForElementPresent("xpath=//select[@id='state_province-Primary']/option[text()='California']");
@@ -221,7 +219,7 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[3][text()='$lastName']"));
     $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[4][text()='jhon@$lastName.com']"));
     $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[5][text()='Education']"));
-    $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[6][text()='United States']"));
+    $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[6][text()='UNITED STATES']"));
     $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[7][text()='CA']"));
     $this->assertTrue($this->isElementPresent("xpath=//table/tbody/tr[2]/td[8][text()='Alameda']"));
 
@@ -247,4 +245,5 @@ class WebTest_Profile_SearchTest extends CiviSeleniumTestCase {
     $this->waitForText('crm-notification-container', 'Is this field hidden from other users');
     $this->select('visibility', 'value=Public Pages and Listings');
   }
+
 }

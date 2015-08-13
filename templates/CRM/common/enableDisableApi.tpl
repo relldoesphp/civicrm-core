@@ -1,8 +1,8 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -42,7 +42,7 @@
 
     function save() {
       $row.closest('table').block();
-      CRM.api3(info.entity, info.action, {id: info.id, field: 'is_active', value: enabled ? 0 : 1}, {success: successMsg}).done(refresh);
+      CRM.api3(info.entity, info.action, {id: info.id, is_active: enabled ? 0 : 1}, {success: successMsg}).done(refresh);
     }
 
     function checkResponse(e, response) {
@@ -64,7 +64,8 @@
           url: CRM.url('civicrm/ajax/statusmsg', {entity: info.entity, id: info.id}),
           title: ts('{/literal}{ts escape="js" 1='%1'}Disable %1{/ts}{literal}', {1: fieldLabel}),
           options: {{/literal}yes: '{ts escape="js"}Yes{/ts}', no: '{ts escape="js"}No{/ts}'{literal}},
-          width: 300
+          width: 300,
+          height: 'auto'
         })
           .on('crmLoad', checkResponse)
           .on('crmConfirm:yes', save);

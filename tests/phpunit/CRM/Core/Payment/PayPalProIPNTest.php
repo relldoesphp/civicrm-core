@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -23,7 +23,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license UAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'CiviTest/CiviUnitTestCase.php';
 
@@ -39,39 +39,31 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
   protected $_contributionPageID;
   protected $_paymentProcessorID;
 
-  /**
-   * @return array
-   */
-  function get_info() {
-    return array(
-      'name' => 'PaypalPro IPN processing',
-      'rescription' => 'PaypalPro IPN methods.',
-      'group' => 'Payment Processor Tests',
-    );
-  }
-
-  function setUp() {
+  public function setUp() {
     parent::setUp();
-    $this->_paymentProcessorID = $this->paymentProcessorCreate();
+    $this->_paymentProcessorID = $this->paymentProcessorCreate(array('is_test' => 0));
     $this->_contactID = $this->individualCreate();
     $contributionPage = $this->callAPISuccess('contribution_page', 'create', array(
-      'title' => "Test Contribution Page",
-      'financial_type_id' => $this->_financialTypeID,
-      'currency' => 'USD',
-      'payment_processor' => $this->_paymentProcessorID,
+        'title' => "Test Contribution Page",
+        'financial_type_id' => $this->_financialTypeID,
+        'currency' => 'USD',
+        'payment_processor' => $this->_paymentProcessorID,
       )
     );
     $this->_contributionPageID = $contributionPage['id'];
   }
 
-  function tearDown() {
+  public function tearDown() {
     $this->quickCleanUpFinancialEntities();
   }
 
   /**
-   * test IPN response updates contribution_recur & contribution for first & second contribution
+   * Test IPN response updates contribution_recur & contribution for first & second contribution.
+   *
+   * The scenario is that a pending contribution exists and the first call will update it to completed.
+   * The second will create a new contribution.
    */
-  function testIPNPaymentRecurSuccess() {
+  public function testIPNPaymentRecurSuccess() {
     $this->setupRecurringPaymentProcessorTransaction();
     $paypalIPN = new CRM_Core_Payment_PayPalProIPN($this->getPaypalProRecurTransaction());
     $paypalIPN->main();
@@ -84,16 +76,20 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
     $this->assertEquals(5, $contributionRecur['contribution_status_id']);
     $paypalIPN = new CRM_Core_Payment_PayPalProIPN($this->getPaypalProRecurSubsequentTransaction());
     $paypalIPN->main();
-    $contribution = $this->callAPISuccess('contribution', 'get', array('contribution_recur_id' => $this->_contributionRecurID, 'sequential' => 1));
+    $contribution = $this->callAPISuccess('contribution', 'get', array(
+        'contribution_recur_id' => $this->_contributionRecurID,
+        'sequential' => 1,
+      ));
     $this->assertEquals(2, $contribution['count']);
     $this->assertEquals('secondone', $contribution['values'][1]['trxn_id']);
   }
 
   /**
-   * test IPN response updates contribution_recur & contribution for first & second contribution
+   * Test IPN response updates contribution_recur & contribution for first & second contribution
    */
-  function testIPNPaymentMembershipRecurSuccess() {
+  public function testIPNPaymentMembershipRecurSuccess() {
     $this->setupMembershipRecurringPaymentProcessorTransaction();
+    $this->callAPISuccessGetSingle('membership_payment', array());
     $paypalIPN = new CRM_Core_Payment_PayPalProIPN($this->getPaypalProRecurTransaction());
     $paypalIPN->main();
     $contribution = $this->callAPISuccess('contribution', 'getsingle', array('id' => $this->_contributionID));
@@ -107,13 +103,24 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
     $paypalIPN = new CRM_Core_Payment_PaypalProIPN($this->getPaypalProRecurSubsequentTransaction());
     $paypalIPN->main();
     $this->assertEquals(strtotime('+ 1 year', strtotime($membershipEndDate)), strtotime($this->callAPISuccessGetValue('membership', array('return' => 'end_date'))));
-    $contribution = $this->callAPISuccess('contribution', 'get', array('contribution_recur_id' => $this->_contributionRecurID, 'sequential' => 1));
+    $contribution = $this->callAPISuccess('contribution', 'get', array(
+        'contribution_recur_id' => $this->_contributionRecurID,
+        'sequential' => 1,
+      ));
     $this->assertEquals(2, $contribution['count']);
     $this->assertEquals('secondone', $contribution['values'][1]['trxn_id']);
-    $this->markTestIncomplete('This is a test for CRM-15203 but that is currently NOT working (however, getting this far indicates CRM-15527 is fixed');
-    $this->callAPISuccessGetSingle('membership_payment', array('contribution_id' => $contribution['values'][1]['id'],));
-    $this->callAPISuccessGetSingle('line_item', array('contribution_id' => $contribution['values'][1]['id'], 'entity_table' => 'civicrm_membership'));
+    $this->callAPISuccessGetCount('line_item', array(
+        'entity_id' => $this->ids['membership'],
+        'entity_table' => 'civicrm_membership',
+      ), 2);
+    $this->callAPISuccessGetSingle('line_item', array(
+        'contribution_id' => $contribution['values'][1]['id'],
+        'entity_table' => 'civicrm_membership',
+      ));
+    $this->callAPISuccessGetSingle('membership_payment', array('contribution_id' => $contribution['values'][1]['id']));
+
   }
+
   /**
    * CRM-13743 test IPN edge case where the first transaction fails and the second succeeds
    * We are checking that the created contribution has the same date as IPN says it should
@@ -121,7 +128,7 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
    * It seems likely that may change in future & this test will start failing (I point this out in the hope it
    * will help future debuggers)
    */
-  function testIPNPaymentCRM13743() {
+  public function testIPNPaymentCRM13743() {
     $this->setupRecurringPaymentProcessorTransaction();
     $firstPaymentParams = $this->getPaypalProRecurTransaction();
     $firstPaymentParams['txn_type'] = 'recurring_payment_failed';
@@ -135,17 +142,19 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
     $this->assertEquals(2, $contributionRecur['contribution_status_id']);
     $paypalIPN = new CRM_Core_Payment_PayPalProIPN($this->getPaypalProRecurSubsequentTransaction());
     $paypalIPN->main();
-    $contribution = $this->callAPISuccess('contribution', 'get', array('contribution_recur_id' => $this->_contributionRecurID, 'sequential' => 1));
+    $contribution = $this->callAPISuccess('contribution', 'get', array(
+        'contribution_recur_id' => $this->_contributionRecurID,
+        'sequential' => 1,
+      ));
     $this->assertEquals(1, $contribution['count']);
     $this->assertEquals('secondone', $contribution['values'][0]['trxn_id']);
     $this->assertEquals(strtotime('03:59:05 Jul 14, 2013 PDT'), strtotime($contribution['values'][0]['receive_date']));
   }
 
   /**
-   * check a payment express IPN call does not throw any errors
+   * Check a payment express IPN call does not throw any errors
    * At this stage nothing it supposed to happen so it's a pretty blunt test
    * but at least it should be e-notice free
-
    * The browser interaction will update Paypal express payments
    * The ipn code redirects POSTs to paypal pro & GETs to paypal std but the
    * documentation (https://www.paypalobjects.com/webstatic/en_US/developer/docs/pdf/ipnguide.pdf)
@@ -159,13 +168,13 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
    *
    * Obviously if the behaviour is fixed then the test should be updated!
    */
-  function testIPNPaymentExpressNoError() {
+  public function testIPNPaymentExpressNoError() {
     $this->setupRecurringPaymentProcessorTransaction();
     $paypalIPN = new CRM_Core_Payment_PayPalProIPN($this->getPaypalExpressTransactionIPN());
-    try{
+    try {
       $paypalIPN->main();
     }
-    catch(CRM_Core_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       $contribution = $this->callAPISuccess('contribution', 'getsingle', array('id' => $this->_contributionID));
       // no change
       $this->assertEquals(2, $contribution['contribution_status_id']);
@@ -176,10 +185,11 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
   }
 
   /**
-   * get PaymentExpress IPN for a single transaction
-   * @return array array representing a Paypal IPN POST
+   * Get PaymentExpress IPN for a single transaction.
+   * @return array
+   *   array representing a Paypal IPN POST
    */
-  function getPaypalExpressTransactionIPN() {
+  public function getPaypalExpressTransactionIPN() {
     return array(
       'mc_gross' => '200.00',
       'invoice' => $this->_invoiceID,
@@ -199,7 +209,7 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
       'notify_version' => '3.7',
       'custom' => '',
       'payer_status' => 'unverified',
-      'address_country' => 'United States',
+      'address_country' => 'UNITED STATES',
       'address_city' => 'Portland',
       'quantity' => '1',
       'verify_sign' => 'AUyUU3IMAvssa3j4KorlbLnfr.9.AW7GX-sL7Ts1brCHvn13npvO-pqf',
@@ -225,10 +235,11 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
   }
 
   /**
-   * Get IPN results from follow on IPN transactions
-   * @return array array representing a Paypal IPN POST
+   * Get IPN results from follow on IPN transactions.
+   * @return array
+   *   array representing a Paypal IPN POST
    */
-  function getSubsequentPaypalExpressTransaction() {
+  public function getSubsequentPaypalExpressTransaction() {
     return array(
       'mc_gross' => '5.00',
       'period_type' => ' Regular',
@@ -256,7 +267,7 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
       'payer_status' => 'unverified',
       'currency_code' => 'USD',
       'business' => 'mpa@mainepeoplesalliance.org',
-      'address_country' => 'United States',
+      'address_country' => 'UNITED STATES',
       'address_city' => 'Limestone',
       'verify_sign' => 'AXi4DULbes8quzIiq2YNsdTJH5ciPPPzG9PcQvkQg4BjfvWi8aY9GgDb',
       'payer_email' => 'passport45051@yahoo.com',
@@ -278,13 +289,13 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
       'shipping' => '0.00',
       'product_type' => '1',
       'time_created' => '12:02:25 May 14, 2013 PDT',
-      'ipn_track_id' => '912e5010eb5a6'
+      'ipn_track_id' => '912e5010eb5a6',
     );
   }
+
   /**
-   *
    */
-  function getPaypalProRecurTransaction() {
+  public function getPaypalProRecurTransaction() {
     return array(
       'amount' => '15.00',
       'initial_payment_amount' => '0.00',
@@ -313,11 +324,7 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
       'amount_per_cycle' => '15.00',
       'mc_gross' => '15.00',
       'payment_date' => '03:59:05 Jul 14, 2013 PDT',
-      'rp_invoice_id' => 'i=' . $this->_invoiceID
-        .'&m=contribute&c='
-        . $this->_contactID
-        . '&r=' . $this->_contributionRecurID
-        . '&b=' . $this->_contributionID . '&p=' . $this->_contributionPageID,
+      'rp_invoice_id' => 'i=' . $this->_invoiceID . '&m=contribute&c=' . $this->_contactID . '&r=' . $this->_contributionRecurID . '&b=' . $this->_contributionID . '&p=' . $this->_contributionPageID,
       'payment_status' => 'Completed',
       'business' => 'nowhere@civicrm.org',
       'last_name' => 'Roberty',
@@ -331,14 +338,15 @@ class CRM_Core_Payment_PayPalProIPNTest extends CiviUnitTestCase {
       'receiver_email' => 'nil@civicrm.org',
       'next_payment_date' => '03:00:00 Aug 14, 2013 PDT',
       'tax' => '0.00',
-      'residence_country' => 'US'
+      'residence_country' => 'US',
     );
   }
 
   /**
    * @return array
    */
-  function getPaypalProRecurSubsequentTransaction() {
+  public function getPaypalProRecurSubsequentTransaction() {
     return array_merge($this->getPaypalProRecurTransaction(), array('txn_id' => 'secondone'));
   }
+
 }

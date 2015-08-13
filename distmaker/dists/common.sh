@@ -19,7 +19,7 @@ function dm_install_dir() {
   if [ ! -d "$to" ]; then
     mkdir -p "$to"
   fi
-  $DM_RSYNC -avC --exclude=.git --exclude=.svn "$from/./"  "$to/./"
+  ${DM_RSYNC:-rsync} -avC --exclude=.git --exclude=.svn "$from/./"  "$to/./"
 }
 
 ## Copy listed files
@@ -45,17 +45,32 @@ function dm_remove_files() {
   done
 }
 
+## Copy all bower dependencies
+function dm_install_bower() {
+  local repo="$1"
+  local to="$2"
+
+  local excludes_rsync=""
+  for exclude in .git .svn {T,t}est{,s} {D,d}oc{,s} {E,e}xample{,s} ; do
+    excludes_rsync="--exclude=${exclude} ${excludes_rsync}"
+  done
+
+  [ ! -d "$to" ] && mkdir "$to"
+  ${DM_RSYNC:-rsync} -avC $excludes_rsync "$repo/./" "$to/./"
+}
+
 ## Copy all core files
 ## usage: dm_install_core <core_repo_path> <to_path>
 function dm_install_core() {
   local repo="$1"
   local to="$2"
 
-  for dir in css i js PEAR templates bin CRM api extern Reports install settings Civi partials ; do
+  for dir in ang css i js PEAR templates bin CRM api extern Reports install settings Civi partials ; do
     [ -d "$repo/$dir" ] && dm_install_dir "$repo/$dir" "$to/$dir"
   done
 
   dm_install_files "$repo" "$to" {agpl-3.0,agpl-3.0.exception,gpl,README,CONTRIBUTORS}.txt
+  dm_install_files "$repo" "$to" composer.json composer.lock bower.json package.json
 
   mkdir -p "$to/sql"
   pushd "$repo" >> /dev/null
@@ -91,7 +106,7 @@ function dm_install_packages() {
   ##   packages/Files packages/PHP packages/Text
 
   [ ! -d "$to" ] && mkdir "$to"
-  $DM_RSYNC -avC $excludes_rsync --include=core "$repo/./" "$to/./"
+  ${DM_RSYNC:-rsync} -avC $excludes_rsync --include=core "$repo/./" "$to/./"
 }
 
 ## Copy Drupal-integration module
@@ -112,6 +127,12 @@ function dm_install_drupal() {
       sed -i'' "s/version = [1-9.]*/version = $DM_VERSION/g" $INFO
     fi
   done
+
+  for f in "$to/.gitignore" "$to/.toxic.json" ; do
+    if [ -f "$f" ]; then
+      rm -f "$f"
+    fi
+  done
 }
 
 ## Copy Joomla-integration module
@@ -125,7 +146,12 @@ function dm_install_joomla() {
   ## modules twice. The two were basically identical -- except that
   ## one included .gitignore and the omitted it. We'll now omit it
   ## consistently.
-  rm -f "$to/.gitignore"
+
+  for f in "$to/.gitignore" "$to/.toxic.json" ; do
+    if [ -f "$f" ]; then
+      rm -f "$f"
+    fi
+  done
 }
 
 ## usage: dm_install_l10n <l10n_repo_path> <to_path>
@@ -133,6 +159,21 @@ function dm_install_l10n() {
   local repo="$1"
   local to="$2"
   dm_install_dir "$repo" "$to"
+}
+
+## Copy composer's "vendor" folder
+## usage: dm_install_vendor <from_path> <to_path>
+function dm_install_vendor() {
+  local repo="$1"
+  local to="$2"
+
+  local excludes_rsync=""
+  for exclude in .git .svn {T,t}est{,s} {D,d}oc{,s} {E,e}xample{,s} ; do
+    excludes_rsync="--exclude=${exclude} ${excludes_rsync}"
+  done
+
+  [ ! -d "$to" ] && mkdir "$to"
+  ${DM_RSYNC:-rsync} -avC $excludes_rsync "$repo/./" "$to/./"
 }
 
 ##  usage: dm_install_wordpress <wp_repo_path> <to_path>
@@ -143,14 +184,35 @@ function dm_install_wordpress() {
   if [ ! -d "$to" ]; then
     mkdir -p "$to"
   fi
-  $DM_RSYNC -avC \
+  ${DM_RSYNC:-rsync} -avC \
     --exclude=.git \
     --exclude=.svn \
     --exclude=civicrm.config.php.wordpress \
+    --exclude=.toxic.json \
     --exclude=.gitignore \
     --exclude=civicrm \
     "$repo/./"  "$to/./"
   ## Need --exclude=civicrm for self-building on WP site
+}
+
+
+## Generate the "bower_components" folder.
+## usage: dm_generate_bower <repo_path>
+function dm_generate_bower() {
+  local repo="$1"
+  pushd "$repo"
+    ${DM_NPM:-npm} install
+    ${DM_NODE:-node} node_modules/bower/bin/bower install
+  popd
+}
+
+## Generate the composer "vendor" folder
+## usage: dm_generate_vendor <repo_path>
+function dm_generate_vendor() {
+  local repo="$1"
+  pushd "$repo"
+    ${DM_COMPOSER:-composer} install
+  popd
 }
 
 ## Generate civicrm-version.php

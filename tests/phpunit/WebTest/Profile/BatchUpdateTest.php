@@ -1,9 +1,9 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 4.5                                                |
+ | CiviCRM version 4.6                                                |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2014                                |
+ | Copyright CiviCRM LLC (c) 2004-2015                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -22,7 +22,7 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
-*/
+ */
 
 require_once 'CiviTest/CiviSeleniumTestCase.php';
 
@@ -35,7 +35,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     parent::setUp();
   }
 
-  function testBatchUpdateWithContactSubtypes() {
+  public function testBatchUpdateWithContactSubtypes() {
     // Log in using webtestLogin() method
     $this->webtestLogin();
 
@@ -62,8 +62,8 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
       array(
         'type' => 'Individual',
         'name' => 'Last Name',
-        'label' => 'Last Name'
-      )
+        'label' => 'Last Name',
+      ),
     );
     $this->addProfile($profileTitle, $profileFields);
     $this->openCiviPage('contact/search', 'reset=1', '_qf_Basic_refresh');
@@ -122,7 +122,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     $this->verifyText($xpath, preg_quote("Staff"));
   }
 
-  function testBatchUpdate() {
+  public function testBatchUpdate() {
     // Log in using webtestLogin() method
     $this->webtestLogin();
 
@@ -235,7 +235,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     // Justification for this instance: FIXME
     sleep(5);
 
-    if ($this->getValue("{$dateElementIdFirstRow}_time") == $this->getValue("{$dateElementIdSecondRow}_time") && $this->getValue("{$dateElementIdFirstRow}_display") == $this->getValue("{$dateElementIdSecondRow}_display")) {
+    if ($this->getValue("{$dateElementIdFirstRow}_time") == $this->getValue("{$dateElementIdSecondRow}_time") && $this->getValue("{$dateElementIdFirstRow}") == $this->getValue("{$dateElementIdSecondRow}")) {
       $assertCheck = TRUE;
     }
     else {
@@ -392,8 +392,8 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
 
     //Reserve and interview respondents
     $this->openCiviPage('campaign', 'reset=1&subPage=survey');
-    $this->waitForElementPresent("xpath=//table[@class='surveys dataTable no-footer']/tbody//tr/td[2]/a[text()='{$surveyTitle}']/../following-sibling::td[@class=' crm-campaign-voterLinks']/span/ul/li/a");
-    $this->click("xpath=//table[@class='surveys dataTable no-footer']/tbody//tr/td[2]/a[text()='{$surveyTitle}']/../following-sibling::td[@class=' crm-campaign-voterLinks']/span/ul/li/a");
+    $this->waitForElementPresent("xpath=//table[@class='surveys dataTable no-footer']/tbody//tr/td[2]/div/a[text()='{$surveyTitle}']/../../following-sibling::td[@class=' crm-campaign-voterLinks']/span/ul/li/a");
+    $this->click("xpath=//table[@class='surveys dataTable no-footer']/tbody//tr/td[2]/div/a[text()='{$surveyTitle}']/../../following-sibling::td[@class=' crm-campaign-voterLinks']/span/ul/li/a");
     $this->waitForPageToLoad($this->getTimeoutMsec());
     $this->click("xpath=//div[@id='search_form_reserve']/div");
     $this->waitForElementPresent('sort_name');
@@ -405,8 +405,8 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     $this->waitForElementPresent('_qf_Reserve_next_reserveToInterview-top');
     $this->clickLink('_qf_Reserve_next_reserveToInterview-top', '_qf_Interview_cancel_interview');
 
-    $this->isElementPresent("xpath=//div[@class='dataTables_wrapper no-footer']/table/tbody//tr/td[text()='{$Name2}']");
-    $this->isElementPresent("xpath=//div[@class='dataTables_wrapper no-footer']/table/tbody//tr/td[text()='{$Name1}']");
+    $this->isElementPresent("xpath=//div[@class='dataTables_wrapper no-footer']/table/tbody//tr/td[2][text()='{$Name2}']");
+    $this->isElementPresent("xpath=//div[@class='dataTables_wrapper no-footer']/table/tbody//tr/td[2][text()='{$Name1}']");
 
     //edition to be done here
     // selecting first check of profile
@@ -476,7 +476,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     // Justification for this instance: FIXME
     sleep(5);
 
-    if ($this->getValue("{$dateElementIdFirstRow}_time") == $this->getValue("{$dateElementIdSecondRow}_time") && $this->getValue("{$dateElementIdFirstRow}_display") == $this->getValue("{$dateElementIdSecondRow}_display")) {
+    if ($this->getValue("{$dateElementIdFirstRow}_time") == $this->getValue("{$dateElementIdSecondRow}_time") && $this->getValue("{$dateElementIdFirstRow}") == $this->getValue("{$dateElementIdSecondRow}")) {
       $assertCheck = TRUE;
     }
     else {
@@ -570,7 +570,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
    * @param $customDataArr
    * @param $profileFor
    */
-  function _addProfile($profileTitle, $customDataArr, $profileFor) {
+  public function _addProfile($profileTitle, $customDataArr, $profileFor) {
 
     $this->openCiviPage('admin/uf/group', 'reset=1');
 
@@ -605,7 +605,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
    *
    * @return array
    */
-  function _addCustomData($profileFor) {
+  public function _addCustomData($profileFor) {
     $returnArray = array();
     $customGroupTitle = 'Custom_' . substr(sha1(rand()), 0, 4);
 
@@ -633,6 +633,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     //for checkbox 1
     $this->waitForElementPresent("label");
     $checkLabel1 = 'Custom Check One Text_' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $checkLabel1);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Alphanumeric");
@@ -664,6 +665,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     // create another custom field - Integer Radio
     //for checkbox 2
     $checkLabel2 = 'Custom Check Two Text_' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $checkLabel2);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Alphanumeric");
@@ -691,6 +693,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     // create another custom field - Date
     $this->waitForElementPresent("label");
     $dateFieldLabel = 'Custom Date Field' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $dateFieldLabel);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Date");
@@ -699,7 +702,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     // enter years prior to current date
     $this->type('start_date_years', 3);
 
-    // enter years upto the end year
+    // enter years up to the end year
     $this->type('end_date_years', 3);
 
     // select the date and time format
@@ -715,10 +718,11 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     //create rich text editor field
     $this->waitForElementPresent("label");
     $richTextField = 'Custom Rich TextField_' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $richTextField);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Note");
-    $this->select('data_type[1]', "label=RichTextEditor");
+    $this->select('data_type[1]', "value=RichTextEditor");
 
     //clicking save
     $this->clickLink('_qf_Field_next_new-top', '_qf_Field_done-bottom', FALSE);
@@ -731,6 +735,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     //for radio 1
     $this->waitForElementPresent("label");
     $radioLabel1 = 'Custom Radio One Text_' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $radioLabel1);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Alphanumeric");
@@ -759,6 +764,7 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
     //for radio 2
     $this->waitForElementPresent("label");
     $radioLabel2 = 'Custom Radio Two Text_' . substr(sha1(rand()), 0, 4);
+    $this->waitForAjaxContent();
     $this->type('label', $radioLabel2);
     $this->click('data_type[0]');
     $this->select('data_type[0]', "label=Alphanumeric");
@@ -785,4 +791,5 @@ class WebTest_Profile_BatchUpdateTest extends CiviSeleniumTestCase {
 
     return $returnArray;
   }
+
 }
